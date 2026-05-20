@@ -146,7 +146,7 @@ footer{text-align:center;font-size:10px;color:var(--muted);font-family:var(--mon
   <div class="tiers"   id="tiers"></div>
 
   <div class="chart-section">
-    <div class="chart-title">Monthly cost — Parquet (selective) vs full GDX in hot tier</div>
+    <div class="chart-title">Monthly cost — Parquet (selective) vs if full GDX stored in each tier</div>
     <div style="position:relative;height:230px">
       <canvas id="chart" role="img" aria-label="Cost comparison bar chart across storage tiers"></canvas>
     </div>
@@ -256,7 +256,7 @@ const PROVIDERS={
 };
 
 const EUR=v=>v*FX;
-const fmtE=v=>v>=1000?'€'+Math.round(v).toLocaleString():v>=1?'€'+v.toFixed(2):'€'+v.toFixed(3);
+const fmtE=v=>v>=1000?'€'+Math.round(v).toLocaleString():v>=1?'€'+v.toFixed(2):v>=0.1?'€'+v.toFixed(3):v>=0.01?'€'+v.toFixed(4):'€'+v.toFixed(4);
 const fmtGB=v=>v>=1024?(v/1024).toFixed(1)+' TB':Math.round(v)+' GB';
 
 function getVals(){
@@ -346,7 +346,7 @@ function render(){
       labels:chartTiers.map(t=>t.name),
       datasets:[
         {label:'Parquet (selective)',data:chartTiers.map((t,i)=>+EUR(totalParquetGB*chartSplits[i]*t.priceUSD).toFixed(4)),backgroundColor:barColors,borderRadius:4},
-        {label:'Full GDX in hot tier',data:chartTiers.map((t,i)=>+(totalGdxGB*chartSplits[i]*hotEur).toFixed(2)),backgroundColor:lightColors,borderRadius:4}
+        {label:'Full GDX per tier',data:chartTiers.map((t,i)=>+(totalGdxGB*chartSplits[i]*EUR(t.priceUSD)).toFixed(2)),backgroundColor:lightColors,borderRadius:4}
       ]
     },
     options:{
@@ -361,7 +361,7 @@ function render(){
 
   document.getElementById('chart-legend').innerHTML=`
     <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div>Parquet selective save</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#1e3a5f"></div>Full GDX in hot tier</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#1e3a5f"></div>Full GDX per tier (for comparison)</div>
   `;
 
   document.getElementById('warnings').innerHTML=`
