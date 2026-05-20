@@ -198,9 +198,9 @@ const PROVIDERS={
     tiers:[
       {key:'hot',     name:'Hot',     label:'Blob Hot',     priceUSD:0.018,   retrieval:'free',            minDays:null, access:'Instant', useCase:'Active runs + catalog',    note:'No minimum duration'},
       {key:'warm',    name:'Cool',    label:'Blob Cool',    priceUSD:0.010,   retrieval:'€0.009/GB',       minDays:30,   access:'Instant', useCase:'Monthly access batches',   note:'30-day minimum billing'},
-      {key:'cold',    name:'Cold',    label:'Blob Cold',    priceUSD:0.0045,  retrieval:'€0.026/GB',       minDays:90,   access:'Instant', useCase:'Quarterly archives',       note:'New in 2023; 90-day minimum'},
+      {key:'cold',    name:'Cold',    label:'Blob Cold',    priceUSD:0.005,  retrieval:'€0.026/GB',       minDays:90,   access:'Instant', useCase:'Quarterly archives',       note:'New in 2023; 90-day minimum'},
       {key:'smart',   name:'Smart',   label:'Smart Tier',   priceUSD:0.018,   retrieval:'free (auto)',     minDays:null, access:'Varies',  useCase:'Auto Hot/Cool/Cold',       note:'No monitoring fee unlike AWS IT'},
-      {key:'archive', name:'Archive', label:'Blob Archive', priceUSD:0.00099, retrieval:'€0.019/GB rehyd.',minDays:180,  access:'1–15 hrs',useCase:'Compliance / legal only',  note:'Rehydration required; offline tier'},
+      {key:'archive', name:'Archive', label:'Blob Archive', priceUSD:0.002, retrieval:'€0.019/GB rehyd.',minDays:180,  access:'1–15 hrs',useCase:'Compliance / legal only',  note:'Rehydration required; offline tier'},
     ],
     warnings:[
       'GRS (Geo-Redundant Storage) roughly doubles the per-GB rate — Hot becomes ~€0.031/GB. Check your default redundancy setting.',
