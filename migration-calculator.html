@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PostgreSQL → Parquet Migration Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0f1e;--surface:#111827;--card:#161e2e;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+  --text:#e8edf5;--muted:#6b7a99;--dim:#3d4f6e;
+  --navy:#000050;--blue:#4472C4;--teal:#14b8a6;
+  --green:#10b981;--red:#ef4444;--amber:#f59e0b;
+  --font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;padding:2rem 1rem}
+.page{max-width:1100px;margin:0 auto}
+
+header{margin-bottom:2.5rem;border-bottom:1px solid var(--border);padding-bottom:1.5rem}
+.tag{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);border:1px solid rgba(20,184,166,.3);padding:3px 10px;border-radius:3px;display:inline-block;margin-bottom:.75rem}
+h1{font-size:clamp(1.4rem,3vw,2rem);font-weight:300;line-height:1.2;margin-bottom:.4rem}
+h1 strong{font-weight:500;color:var(--teal)}
+.subtitle{font-size:13px;color:var(--muted);font-style:italic}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem}
+@media(max-width:680px){.grid-2{grid-template-columns:1fr}}
+
+.panel{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem}
+.panel-title{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:1.1rem}
+
+.control{margin-bottom:1rem}
+.control label{display:block;font-size:12px;color:var(--muted);margin-bottom:.4rem}
+.slider-row{display:flex;align-items:center;gap:10px}
+input[type=range]{flex:1;-webkit-appearance:none;height:3px;background:var(--dim);border-radius:2px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--teal);cursor:pointer;border:2px solid var(--bg)}
+.val{font-family:var(--mono);font-size:12px;color:var(--text);min-width:70px;text-align:right}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.5rem}
+@media(max-width:680px){.stats{grid-template-columns:repeat(2,1fr)}}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.875rem 1rem}
+.stat-label{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:3px}
+.stat-value{font-family:var(--mono);font-size:1.4rem;font-weight:500}
+.stat.green .stat-value{color:var(--green)}
+.stat.red .stat-value{color:var(--red)}
+.stat.amber .stat-value{color:var(--amber)}
+.stat.teal .stat-value{color:var(--teal)}
+
+.chart-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1.25rem}
+.chart-title{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:1rem}
+.chart-inner{position:relative;height:250px}
+.legend{display:flex;gap:16px;margin-top:10px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
+.legend-dot{width:24px;height:3px;border-radius:2px;flex-shrink:0}
+
+.verdict{border-radius:10px;padding:1rem 1.25rem;font-size:13px;line-height:1.6;border:1px solid}
+.verdict strong{display:block;font-size:14px;font-weight:500;margin-bottom:.25rem}
+.verdict.stay{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.25)}
+.verdict.stay strong{color:var(--red)}
+.verdict.wait{background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.25)}
+.verdict.wait strong{color:var(--amber)}
+.verdict.go{background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.25)}
+.verdict.go strong{color:var(--green)}
+.verdict p{color:var(--muted);margin-top:.25rem}
+
+.breakeven-box{background:var(--surface);border-radius:8px;padding:.875rem 1rem;text-align:center}
+.be-label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:4px}
+.be-value{font-family:var(--mono);font-size:1.5rem;font-weight:500}
+.be-sub{font-size:11px;color:var(--muted);margin-top:3px}
+
+footer{text-align:center;font-size:10px;color:var(--dim);font-family:var(--mono);padding-top:1.25rem;border-top:1px solid var(--border);margin-top:1rem}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="tag">Wien Energie · Migration Decision Tool</div>
+    <h1>PostgreSQL → <strong>Parquet + Iceberg</strong><br>When does migration make sense?</h1>
+    <p class="subtitle">Pre-loaded with your actual Azure setup: €302/mo compute, €0.12/GB Premium SSD, 1TB provisioned</p>
+  </header>
+
+  <div class="stats">
+    <div class="stat red">
+      <div class="stat-label">PG results storage/mo</div>
+      <div class="stat-value" id="s-pg">€0</div>
+    </div>
+    <div class="stat teal">
+      <div class="stat-label">Blob storage/mo</div>
+      <div class="stat-value" id="s-blob">€0</div>
+    </div>
+    <div class="stat green">
+      <div class="stat-label">Monthly saving</div>
+      <div class="stat-value" id="s-save">€0</div>
+    </div>
+    <div class="stat amber">
+      <div class="stat-label">5-year total saving</div>
+      <div class="stat-value" id="s-5yr">€0</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-title">Your current setup</div>
+
+      <div class="control">
+        <label>Model results currently in PostgreSQL</label>
+        <div class="slider-row">
+          <input type="range" min="10" max="2000" step="10" value="200" id="pg-gb">
+          <span class="val" id="pg-gb-v">200 GB</span>
+        </div>
+      </div>
+
+      <div class="control">
+        <label>Results growth per year</label>
+        <div class="slider-row">
+          <input type="range" min="50" max="2000" step="50" value="400" id="growth">
+          <span class="val" id="growth-v">400 GB/yr</span>
+        </div>
+      </div>
+
+      <div class="control">
+        <label>Parquet compression ratio (unknown until tested)</label>
+        <div class="slider-row">
+          <input type="range" min="2" max="10" step="1" value="5" id="compression">
+          <span class="val" id="compression-v">5×</span>
+        </div>
+      </div>
+
+      <div class="control">
+        <label>Migration engineering cost (one-time)</label>
+        <div class="slider-row">
+          <input type="range" min="1000" max="30000" step="500" value="8000" id="mig-cost">
+          <span class="val" id="mig-cost-v">€8,000</span>
+        </div>
+      </div>
+
+      <div class="control">
+        <label>Ongoing maintenance overhead (€/mo)</label>
+        <div class="slider-row">
+          <input type="range" min="0" max="500" step="25" value="50" id="maintenance">
+          <span class="val" id="maintenance-v">€50</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Azure prices</div>
+
+      <div class="control">
+        <label>PostgreSQL Premium SSD (€/GB/mo)</label>
+        <div class="slider-row">
+          <input type="range" min="0.05" max="0.20" step="0.005" value="0.12" id="pg-price">
+          <span class="val" id="pg-price-v">€0.120</span>
+        </div>
+      </div>
+
+      <div class="control">
+        <label>Azure Blob Hot tier (€/GB/mo)</label>
+        <div class="slider-row">
+          <input type="range" min="0.010" max="0.030" step="0.001" value="0.016" id="blob-price">
+          <span class="val" id="blob-price-v">€0.016</span>
+        </div>
+      </div>
+
+      <div class="control" style="margin-bottom:1.5rem">
+        <label>Azure Blob Cool tier (€/GB/mo) — for older results</label>
+        <div class="slider-row">
+          <input type="range" min="0.005" max="0.020" step="0.001" value="0.009" id="cool-price">
+          <span class="val" id="cool-price-v">€0.009</span>
+        </div>
+      </div>
+
+      <div class="breakeven-box">
+        <div class="be-label">Breakeven point</div>
+        <div class="be-value" id="be-value">—</div>
+        <div class="be-sub" id="be-sub"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-wrap">
+    <div class="chart-title">Cumulative cost of results storage — 5 years</div>
+    <div class="chart-inner">
+      <canvas id="chart" role="img" aria-label="Line chart comparing cumulative PostgreSQL storage costs vs Parquet on Azure Blob over 60 months, showing breakeven crossover point">Cumulative cost comparison over 5 years between PostgreSQL Premium SSD storage and Parquet on Azure Blob Hot tier including migration cost.</canvas>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div>PostgreSQL Premium SSD</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#14b8a6;border-top:2px dashed #14b8a6;height:0"></div>Parquet on Blob (incl. migration + maintenance)</div>
+    </div>
+  </div>
+
+  <div class="verdict" id="verdict">
+    <strong></strong>
+    <p></p>
+  </div>
+
+  <footer>
+    Azure prices converted at 1 USD = €0.8618 · Based on your psql-amis-marktanalyse-prod-002 setup · Wien Energie 2026
+  </footer>
+</div>
+
+<script>
+let chart = null;
+const FX = 0.8618;
+
+const fmtE = v => {
+  const a = Math.abs(v);
+  if (a >= 10000) return (v < 0 ? '-' : '') + '€' + Math.round(a / 1000) + 'k';
+  if (a >= 1000) return (v < 0 ? '-' : '') + '€' + Math.round(a).toLocaleString();
+  return (v < 0 ? '-' : '') + '€' + Math.round(a);
+};
+const fmtGB = gb => gb >= 1024 ? (gb / 1024).toFixed(1) + ' TB' : Math.round(gb) + ' GB';
+
+function get(id) { return +document.getElementById(id).value; }
+
+function render() {
+  const pgGB       = get('pg-gb');
+  const growthGB   = get('growth');
+  const compress   = get('compression');
+  const migCost    = get('mig-cost');
+  const maint      = get('maintenance');
+  const pgPrice    = get('pg-price');
+  const blobPrice  = get('blob-price');
+
+  const months = Array.from({length: 61}, (_, i) => i);
+
+  const pgCumul = months.map(m =>
+    months.slice(0, m + 1).reduce((s, mi) => s + (pgGB + (growthGB / 12) * mi) * pgPrice, 0)
+  );
+
+  const blobCumul = months.map(m =>
+    migCost + maint * m + months.slice(0, m + 1).reduce((s, mi) => {
+      const parquetGB = (pgGB + (growthGB / 12) * mi) / compress;
+      return s + parquetGB * blobPrice;
+    }, 0)
+  );
+
+  const breakevenIdx = months.find(m => m > 0 && blobCumul[m] <= pgCumul[m]);
+  const breakevenYr  = breakevenIdx != null ? (breakevenIdx / 12).toFixed(1) : null;
+
+  const curPGCost   = pgGB * pgPrice;
+  const curBlob     = (pgGB / compress) * blobPrice;
+  const monthlySave = curPGCost - curBlob - maint;
+  const fiveYrSave  = pgCumul[60] - blobCumul[60];
+
+  document.getElementById('s-pg').textContent   = fmtE(curPGCost);
+  document.getElementById('s-blob').textContent  = fmtE(curBlob);
+  document.getElementById('s-save').textContent  = fmtE(Math.max(0, monthlySave));
+  document.getElementById('s-5yr').textContent   = fmtE(fiveYrSave);
+
+  const beEl  = document.getElementById('be-value');
+  const beSub = document.getElementById('be-sub');
+
+  if (breakevenYr) {
+    beEl.textContent = breakevenYr + ' years';
+    beEl.style.color = '#14b8a6';
+    const gbAtBreak = pgGB + growthGB * (breakevenIdx / 12);
+    beSub.textContent = 'at ~' + fmtGB(gbAtBreak) + ' of results data';
+  } else if (monthlySave <= 0) {
+    beEl.textContent = 'Never';
+    beEl.style.color = '#ef4444';
+    beSub.textContent = 'maintenance exceeds savings';
+  } else {
+    beEl.textContent = '> 5 years';
+    beEl.style.color = '#f59e0b';
+    beSub.textContent = 'outside the 5-year window';
+  }
+
+  const verdict = document.getElementById('verdict');
+  const vStrong = verdict.querySelector('strong');
+  const vP = verdict.querySelector('p');
+  verdict.className = 'verdict';
+
+  if (!breakevenYr && monthlySave <= 0) {
+    verdict.classList.add('stay');
+    vStrong.textContent = 'Stay with PostgreSQL.';
+    vP.textContent = 'The migration cost and maintenance overhead exceed storage savings at your current scale. Revisit when results data grows significantly or when query performance becomes a bottleneck.';
+  } else if (!breakevenYr || parseFloat(breakevenYr) > 3) {
+    verdict.classList.add('wait');
+    vStrong.textContent = 'Not yet — but watch the growth.';
+    const gbIn2yr = fmtGB(pgGB + growthGB * 2);
+    vP.textContent = `Breakeven is ${breakevenYr ? breakevenYr + ' years away' : 'beyond 5 years'}. Keep PostgreSQL for now. Revisit when results reach ${gbIn2yr} — or when the academics start complaining about query speed.`;
+  } else {
+    verdict.classList.add('go');
+    vStrong.textContent = `Migration makes sense — breakeven in ${breakevenYr} years.`;
+    vP.textContent = `Monthly saving after migration: ${fmtE(monthlySave)}/month. Total 5-year saving vs staying on PostgreSQL: ${fmtE(fiveYrSave)}. Migration engineering cost recovered in ${breakevenYr} years.`;
+  }
+
+  const lbls = months.filter(m => m % 6 === 0).map(m => m === 0 ? 'Now' : m + 'mo');
+  const pgD  = months.filter(m => m % 6 === 0).map(m => Math.round(pgCumul[m]));
+  const blD  = months.filter(m => m % 6 === 0).map(m => Math.round(blobCumul[m]));
+
+  const ctx = document.getElementById('chart').getContext('2d');
+  if (chart) chart.destroy();
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: lbls,
+      datasets: [
+        { label:'PostgreSQL storage', data: pgD, borderColor:'#ef4444', backgroundColor:'rgba(239,68,68,0.06)', borderWidth:2, fill:true, tension:0.3, pointRadius:3, pointBackgroundColor:'#ef4444' },
+        { label:'Parquet on Blob', data: blD, borderColor:'#14b8a6', backgroundColor:'rgba(20,184,166,0.05)', borderWidth:2, borderDash:[5,4], fill:true, tension:0.3, pointRadius:3, pointBackgroundColor:'#14b8a6' }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` ${c.dataset.label}: €${c.parsed.y.toLocaleString()}` } } },
+      scales: {
+        x: { grid: { color:'rgba(255,255,255,0.05)' }, ticks: { color:'#6b7a99', font: { size:11 } } },
+        y: { grid: { color:'rgba(255,255,255,0.05)' }, ticks: { color:'#6b7a99', font: { size:11 }, callback: v => '€' + (v >= 1000 ? Math.round(v/1000) + 'k' : Math.round(v)) } }
+      }
+    }
+  });
+}
+
+[
+  ['pg-gb',       'pg-gb-v',       v => fmtGB(+v)],
+  ['growth',      'growth-v',      v => fmtGB(+v) + '/yr'],
+  ['compression', 'compression-v', v => v + '×'],
+  ['mig-cost',    'mig-cost-v',    v => '€' + (+v).toLocaleString()],
+  ['maintenance', 'maintenance-v', v => '€' + v + '/mo'],
+  ['pg-price',    'pg-price-v',    v => '€' + (+v).toFixed(3)],
+  ['blob-price',  'blob-price-v',  v => '€' + (+v).toFixed(3)],
+  ['cool-price',  'cool-price-v',  v => '€' + (+v).toFixed(3)],
+].forEach(([id, labelId, fmt]) => {
+  document.getElementById(id).addEventListener('input', function() {
+    document.getElementById(labelId).textContent = fmt(this.value);
+    render();
+  });
+});
+
+render();
+</script>
+</body>
+</html>
