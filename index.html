@@ -188,7 +188,7 @@ footer{text-align:center;font-size:10px;color:var(--muted);font-family:var(--mon
   </div>
 
   <div class="chart-section">
-    <div class="chart-title">Monthly cost — Parquet (selective) vs if full GDX stored in each tier</div>
+    <div class="chart-title">Monthly storage cost — Parquet vs full GDX, if ALL runs stored in each tier</div>
     <div style="position:relative;height:230px">
       <canvas id="chart" role="img" aria-label="Cost comparison bar chart across storage tiers"></canvas>
     </div>
@@ -209,7 +209,7 @@ let provider='aws', egressMode='same', chartInst=null;
 const PROVIDERS={
   aws:{
     name:'AWS S3',infoBox:null,
-    splits:[0.20,0.20,0.20,0.15,0.15,0.10],
+    
     tiers:[
       {key:'hot',     name:'Standard',    label:'S3 Standard',            priceUSD:0.023,   retrieval:0,       retrievalLabel:'free',       minDays:null, access:'Instant',     note:'Volume discounts at 50TB & 500TB',  put:0.005,  get:0.0004},
       {key:'warm',    name:'Std-IA',       label:'S3 Standard-IA',         priceUSD:0.0125,  retrieval:0.01*FX, retrievalLabel:'€0.009/GB',  minDays:30,   access:'Instant',     note:'30-day minimum billing',            put:0.01,   get:0.001},
@@ -224,7 +224,7 @@ const PROVIDERS={
   azure:{
     name:'Azure Blob',
     infoBox:{title:'Azure Smart Tier',pill:'Preview 2026',text:'Azure Smart Tier automatically moves blobs between Hot, Cool, and Cold based on access patterns — with NO per-object monitoring fee (unlike AWS Intelligent-Tiering). Currently in preview as of 2026; verify GA status before production use. Effective cost sits between Hot and Cool depending on access frequency.'},
-    splits:[0.20,0.20,0.20,0.15,0.15],
+    
     tiers:[
       {key:'hot',    name:'Hot',    label:'Blob Hot',    priceUSD:0.018,  retrieval:0,       retrievalLabel:'free',              minDays:null, access:'Instant',  note:'No minimum duration',              put:0.0228, get:0.00036},
       {key:'warm',   name:'Cool',   label:'Blob Cool',   priceUSD:0.010,  retrieval:0.01,    retrievalLabel:'€0.009/GB',         minDays:30,   access:'Instant',  note:'30-day minimum billing',           put:0.010,  get:0.001},
@@ -238,7 +238,7 @@ const PROVIDERS={
   gcp:{
     name:'Google Cloud',
     infoBox:{title:'GCP 2026 pricing changes',pill:'Updated 2026',text:'Google made two notable changes in 2026: Nearline multi-region pricing increased from $0.010 to $0.015/GB, and Archive multi-region pricing decreased from $0.004 to $0.0024/GB (US/EU). Review your lifecycle policies if you use multi-region buckets — the old math no longer holds.'},
-    splits:[0.25,0.25,0.25,0.25],
+    
     tiers:[
       {key:'hot',    name:'Standard',label:'GCS Standard',priceUSD:0.020, retrieval:0,      retrievalLabel:'free',      minDays:null, access:'Instant', note:'Free inter-region reads in same multi-region',put:0.005, get:0.0004},
       {key:'warm',   name:'Nearline',label:'GCS Nearline',priceUSD:0.010, retrieval:0.01*FX,retrievalLabel:'€0.009/GB', minDays:30,   access:'Instant', note:'30-day minimum; multi-region now $0.015',     put:0.01,  get:0.001},
@@ -251,7 +251,7 @@ const PROVIDERS={
   oci:{
     name:'Oracle OCI',
     infoBox:{title:'OCI egress advantage',pill:'Key differentiator',text:'Oracle OCI includes 10 TB/month of free egress across all OCI services, then charges only $0.0085/GB — roughly 10× cheaper than AWS at $0.09/GB. OCI Standard storage is more expensive per-GB than AWS/Azure/GCP, but for egress-heavy workloads OCI is frequently cheaper overall. Choose OCI on total cost including transfer, not on storage rate alone.'},
-    splits:[0.40,0.35,0.25],
+    
     tiers:[
       {key:'hot',    name:'Standard', label:'OCI Object Standard',   priceUSD:0.0255,retrieval:0,      retrievalLabel:'free',      minDays:null,access:'Instant',  note:'Same price in all OCI regions globally',put:0.00368,get:0.000295},
       {key:'warm',   name:'Infreq.',  label:'OCI Infrequent Access', priceUSD:0.015, retrieval:0.01*FX,retrievalLabel:'€0.009/GB', minDays:31,  access:'Instant',  note:'31-day minimum billing',               put:0.00368,get:0.00368},
@@ -299,18 +299,19 @@ function render(){
   const{parquetMB,gdxGB,runs,queries,readMB,totalParquetGB,totalGdxGB}=getVals();
   const prov=PROVIDERS[provider];
   const tiers=prov.tiers;
-  const splits=prov.splits;
+  
   const hotEurPerGB=tiers[0].priceUSD*FX;
 
-  let totalCost=0;
+  // Each tier shows cost IF ALL runs were stored in that tier
   const tierCosts=tiers.map((t,i)=>{
-    const gb=totalParquetGB*(splits[i]||0.1);
+    const gb=totalParquetGB;
     const cost=(gb*t.priceUSD*FX);
-    totalCost+=cost;
     return{gb,cost};
   });
+  const totalCost=tierCosts[0].cost; // default to hot for summary
 
   const naiveCost=totalGdxGB*hotEurPerGB;
+  const cheapestTierCost=tierCosts[tierCosts.length-1].cost;
   const saving=naiveCost-totalCost;
   const savingPct=Math.round((saving/naiveCost)*100);
 
@@ -325,9 +326,9 @@ function render(){
   document.getElementById('summary').innerHTML=`
     <div class="stat-card"><div class="stat-label">Total Parquet</div><div class="stat-value">${fmtGB(totalParquetGB)}</div><div class="stat-sub">${runs.toLocaleString()} × ${parquetMB}MB</div></div>
     <div class="stat-card"><div class="stat-label">Total GDX archive</div><div class="stat-value">${fmtGB(totalGdxGB)}</div><div class="stat-sub">${runs.toLocaleString()} × ${gdxGB}GB</div></div>
-    <div class="stat-card green"><div class="stat-label">Your total (Parquet)</div><div class="stat-value">${fmtE(totalCost)}<small style="font-size:.9rem">/mo</small></div><div class="stat-sub">${fmtGB(totalParquetGB)} total</div></div>
+    <div class="stat-card green"><div class="stat-label">Cheapest tier (Parquet)</div><div class="stat-value">${fmtE(cheapestTierCost)}<small style="font-size:.9rem">/mo</small></div><div class="stat-sub">${fmtGB(totalParquetGB)} · ${tiers[tiers.length-1].name}</div></div>
     <div class="stat-card red"><div class="stat-label">Full GDX in hot tier</div><div class="stat-value">${fmtE(naiveCost)}<small style="font-size:.9rem">/mo</small></div><div class="stat-sub">${fmtGB(totalGdxGB)} total</div></div>
-    <div class="stat-card blue"><div class="stat-label">Monthly saving</div><div class="stat-value">${fmtE(saving)}<small style="font-size:.9rem">/mo</small></div><div class="stat-sub">${savingPct}% cheaper</div></div>
+    <div class="stat-card blue"><div class="stat-label">Max saving (vs GDX hot)</div><div class="stat-value">${fmtE(naiveCost-cheapestTierCost)}<small style="font-size:.9rem">/mo</small></div><div class="stat-sub">${Math.round(((naiveCost-cheapestTierCost)/naiveCost)*100)}% cheaper</div></div>
   `;
 
   // Tier cards
@@ -339,7 +340,7 @@ function render(){
       </div>
       <div class="tier-body">
         <div class="tier-cost">${fmtE(tierCosts[i].cost)}<span style="font-size:.85rem;font-weight:400">/mo</span></div>
-        <div class="tier-size">${tierCosts[i].gb.toFixed(1)} GB · ${Math.round((splits[i]||0.1)*100)}% of runs</div>
+        <div class="tier-size">${fmtGB(tierCosts[i].gb)} · all runs</div>
         <div class="tier-details">
           <div class="tier-detail-row"><span class="dk">€/GB/mo</span><span class="dv">${fmtE(t.priceUSD*FX)}</span></div>
           <div class="tier-detail-row"><span class="dk">Access</span><span class="dv">${t.access}</span></div>
@@ -385,7 +386,6 @@ function render(){
 
   // Chart
   const chartTiers=tiers.filter(t=>t.key!=='smart');
-  const chartSplits=splits.slice(0,chartTiers.length);
   const barColors=['#3b82f6','#10b981','#f97316','#8b5cf6','#f59e0b','#6b7280'];
   const lightColors=['#1e3a5f','#065f46','#7c2d12','#3b1f6e','#78350f','#374151'];
   const ctx=document.getElementById('chart').getContext('2d');
@@ -395,8 +395,8 @@ function render(){
     data:{
       labels:chartTiers.map(t=>t.name),
       datasets:[
-        {label:'Parquet (selective)',data:chartTiers.map((t,i)=>+((totalParquetGB*(chartSplits[i]||0.15))*t.priceUSD*FX).toFixed(4)),backgroundColor:barColors,borderRadius:4},
-        {label:'Full GDX per tier', data:chartTiers.map((t,i)=>+((totalGdxGB*(chartSplits[i]||0.15))*t.priceUSD*FX).toFixed(2)),backgroundColor:lightColors,borderRadius:4}
+        {label:'Parquet (selective)',data:chartTiers.map((t,i)=>+(totalParquetGB*t.priceUSD*FX).toFixed(4)),backgroundColor:barColors,borderRadius:4},
+        {label:'Full GDX per tier', data:chartTiers.map((t,i)=>+(totalGdxGB*t.priceUSD*FX).toFixed(2)),backgroundColor:lightColors,borderRadius:4}
       ]
     },
     options:{
