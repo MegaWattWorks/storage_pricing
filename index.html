@@ -71,7 +71,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 .warn-item:last-child{border-bottom:none}
 .warn-item::before{content:"⚠";color:var(--amber);flex-shrink:0}
 footer{text-align:center;font-size:10px;color:var(--muted);font-family:var(--mono);padding-top:.875rem;border-top:1px solid var(--border)}
-/* tier color theming */
 .tier-card.hot    {border-color:rgba(59,130,246,.25)}
 .tier-card.warm   {border-color:rgba(16,185,129,.25)}
 .tier-card.cold   {border-color:rgba(139,92,246,.25)}
@@ -82,24 +81,38 @@ footer{text-align:center;font-size:10px;color:var(--muted);font-family:var(--mon
 .tier-card.hot    .tier-header{background:rgba(59,130,246,.1)}
 .tier-card.warm   .tier-header{background:rgba(16,185,129,.1)}
 .tier-card.cold   .tier-header{background:rgba(139,92,246,.1)}
-.tier-card.archive.tier-header{background:rgba(107,114,128,.1)}
+.tier-card.archive .tier-header{background:rgba(107,114,128,.1)}
 .tier-card.smart  .tier-header{background:rgba(20,184,166,.12)}
-.tier-card.onezone.tier-header{background:rgba(249,115,22,.1)}
-.tier-card.flexible.tier-header{background:rgba(245,158,11,.1)}
+.tier-card.onezone .tier-header{background:rgba(249,115,22,.1)}
+.tier-card.flexible .tier-header{background:rgba(245,158,11,.1)}
 .tier-card.hot    .tier-name,.tier-card.hot    .tier-cost{color:#60a5fa}
 .tier-card.warm   .tier-name,.tier-card.warm   .tier-cost{color:#34d399}
 .tier-card.cold   .tier-name,.tier-card.cold   .tier-cost{color:#a78bfa}
-.tier-card.archive.tier-name,.tier-card.archive.tier-cost{color:#9ca3af}
+.tier-card.archive .tier-name,.tier-card.archive .tier-cost{color:#9ca3af}
 .tier-card.smart  .tier-name,.tier-card.smart  .tier-cost{color:#2dd4bf}
-.tier-card.onezone.tier-name,.tier-card.onezone.tier-cost{color:#fb923c}
-.tier-card.flexible.tier-name,.tier-card.flexible.tier-cost{color:#fbbf24}
+.tier-card.onezone .tier-name,.tier-card.onezone .tier-cost{color:#fb923c}
+.tier-card.flexible .tier-name,.tier-card.flexible .tier-cost{color:#fbbf24}
 .tier-card.hot    .tier-badge{background:rgba(59,130,246,.2);color:#60a5fa}
 .tier-card.warm   .tier-badge{background:rgba(16,185,129,.2);color:#34d399}
 .tier-card.cold   .tier-badge{background:rgba(139,92,246,.2);color:#a78bfa}
-.tier-card.archive.tier-badge{background:rgba(107,114,128,.2);color:#9ca3af}
+.tier-card.archive .tier-badge{background:rgba(107,114,128,.2);color:#9ca3af}
 .tier-card.smart  .tier-badge{background:rgba(20,184,166,.2);color:#2dd4bf}
-.tier-card.onezone.tier-badge{background:rgba(249,115,22,.2);color:#fb923c}
-.tier-card.flexible.tier-badge{background:rgba(245,158,11,.2);color:#fbbf24}
+.tier-card.onezone .tier-badge{background:rgba(249,115,22,.2);color:#fb923c}
+.tier-card.flexible .tier-badge{background:rgba(245,158,11,.2);color:#fbbf24}
+/* Extra: ops + egress section */
+.ops-section{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1.25rem}
+.ops-title{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.875rem}
+.ops-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.875rem;margin-bottom:1rem}
+.ops-controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:1rem;padding:1rem;background:var(--surface2);border-radius:8px}
+.ops-row{display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-bottom:1px solid var(--border);color:var(--muted)}
+.ops-row:last-child{border-bottom:none}
+.ops-row .ok{color:var(--green);font-family:var(--mono)}
+.ops-row .warn{color:var(--amber);font-family:var(--mono)}
+.ops-row .bad{color:var(--red);font-family:var(--mono)}
+.ops-total{display:flex;justify-content:space-between;font-size:14px;font-weight:600;padding-top:10px;border-top:1px solid var(--border2);margin-top:4px;font-family:var(--mono)}
+.egress-toggle{display:flex;gap:8px;margin-bottom:1rem}
+.egress-btn{padding:6px 14px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--muted);font-family:var(--font);font-size:12px;cursor:pointer}
+.egress-btn.active{background:rgba(20,184,166,.15);border-color:var(--teal);color:var(--teal)}
 </style>
 </head>
 <body>
@@ -114,22 +127,22 @@ footer{text-align:center;font-size:10px;color:var(--muted);font-family:var(--mon
     <div class="control-group">
       <label>Parquet size per run (MB)</label>
       <div class="slider-row">
-        <input type="range" min="50" max="2000" step="50" value="200" id="parquet-slider">
-        <span class="slider-val" id="parquet-val">200 MB</span>
+        <input type="range" min="50" max="2000" step="50" value="175" id="parquet-slider">
+        <span class="slider-val" id="parquet-val">175 MB</span>
       </div>
     </div>
     <div class="control-group">
       <label>GDX size per run (GB)</label>
       <div class="slider-row">
-        <input type="range" min="1" max="50" step="1" value="20" id="gdx-slider">
-        <span class="slider-val" id="gdx-val">20 GB</span>
+        <input type="range" min="1" max="50" step="1" value="1" id="gdx-slider">
+        <span class="slider-val" id="gdx-val">1 GB</span>
       </div>
     </div>
     <div class="control-group">
       <label>Number of runs</label>
       <div class="slider-row">
-        <input type="range" min="100" max="5000" step="100" value="1000" id="runs-slider">
-        <span class="slider-val" id="runs-val">1,000</span>
+        <input type="range" min="100" max="8000" step="100" value="4000" id="runs-slider">
+        <span class="slider-val" id="runs-val">4,000</span>
       </div>
     </div>
   </div>
@@ -143,7 +156,36 @@ footer{text-align:center;font-size:10px;color:var(--muted);font-family:var(--mon
 
   <div id="info-box-container"></div>
   <div class="summary" id="summary"></div>
-  <div class="tiers"   id="tiers"></div>
+  <div class="tiers" id="tiers"></div>
+
+  <!-- Operations & Egress section (new) -->
+  <div class="ops-section">
+    <div class="ops-title">Operations &amp; Egress costs (not in original tool)</div>
+    <div class="ops-controls">
+      <div class="control-group">
+        <label>Queries / month</label>
+        <div class="slider-row">
+          <input type="range" min="1" max="1000" step="1" value="100" id="queries-slider">
+          <span class="slider-val" id="queries-val">100</span>
+        </div>
+      </div>
+      <div class="control-group">
+        <label>MB read per query</label>
+        <div class="slider-row">
+          <input type="range" min="10" max="2000" step="10" value="175" id="readmb-slider">
+          <span class="slider-val" id="readmb-val">175 MB</span>
+        </div>
+      </div>
+    </div>
+    <div style="margin-bottom:.75rem">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:6px">Query location</div>
+      <div class="egress-toggle">
+        <button class="egress-btn active" id="e-same" onclick="setEgress('same')">Same region VM (free egress)</button>
+        <button class="egress-btn" id="e-ext" onclick="setEgress('ext')">On-prem / external Python</button>
+      </div>
+    </div>
+    <div id="ops-breakdown"></div>
+  </div>
 
   <div class="chart-section">
     <div class="chart-title">Monthly cost — Parquet (selective) vs if full GDX stored in each tier</div>
@@ -162,136 +204,113 @@ footer{text-align:center;font-size:10px;color:var(--muted);font-family:var(--mon
 
 <script>
 const FX=0.8618;
-let provider='aws';
-let chartInst=null;
+let provider='aws', egressMode='same', chartInst=null;
 
 const PROVIDERS={
   aws:{
-    name:'AWS S3',
-    infoBox:null,
+    name:'AWS S3',infoBox:null,
     splits:[0.20,0.20,0.20,0.15,0.15,0.10],
     tiers:[
-      {key:'hot',     name:'Standard',   label:'S3 Standard',            priceUSD:0.023,   retrieval:'free',        minDays:null, access:'Instant',    useCase:'Active runs + catalog',      note:'Volume discounts at 50TB & 500TB'},
-      {key:'warm',    name:'Std-IA',      label:'S3 Standard-IA',         priceUSD:0.0125,  retrieval:'€0.009/GB',   minDays:30,   access:'Instant',    useCase:'Monthly access batches',     note:'30-day minimum billing'},
-      {key:'onezone', name:'One Zone-IA', label:'S3 One Zone-IA',         priceUSD:0.010,   retrieval:'€0.009/GB',   minDays:30,   access:'Instant',    useCase:'Recreatable data only',      note:'Single AZ — no redundancy'},
-      {key:'cold',    name:'Glacier IR',  label:'S3 Glacier Instant',     priceUSD:0.004,   retrieval:'€0.026/GB',   minDays:90,   access:'Milliseconds',useCase:'Quarterly access archives',  note:'Instant retrieval, 90-day min'},
-      {key:'flexible',name:'Glacier Flex',label:'S3 Glacier Flexible',    priceUSD:0.0036,  retrieval:'€0.026/GB',   minDays:90,   access:'1min–12hrs', useCase:'Annual access archives',     note:'Mins to hrs retrieval'},
-      {key:'archive', name:'Deep Archive',label:'S3 Glacier Deep Archive',priceUSD:0.00099, retrieval:'€0.017/GB',   minDays:180,  access:'12 hours',   useCase:'Compliance / legal only',    note:'Cheapest; 180-day minimum'},
+      {key:'hot',     name:'Standard',    label:'S3 Standard',            priceUSD:0.023,   retrieval:0,       retrievalLabel:'free',       minDays:null, access:'Instant',     note:'Volume discounts at 50TB & 500TB',  put:0.005,  get:0.0004},
+      {key:'warm',    name:'Std-IA',       label:'S3 Standard-IA',         priceUSD:0.0125,  retrieval:0.01*FX, retrievalLabel:'€0.009/GB',  minDays:30,   access:'Instant',     note:'30-day minimum billing',            put:0.01,   get:0.001},
+      {key:'onezone', name:'One Zone-IA',  label:'S3 One Zone-IA',         priceUSD:0.010,   retrieval:0.01*FX, retrievalLabel:'€0.009/GB',  minDays:30,   access:'Instant',     note:'Single AZ — no redundancy',         put:0.01,   get:0.001},
+      {key:'cold',    name:'Glacier IR',   label:'S3 Glacier Instant',     priceUSD:0.004,   retrieval:0.03*FX, retrievalLabel:'€0.026/GB',  minDays:90,   access:'Milliseconds',note:'Instant retrieval, 90-day min',      put:0.03,   get:0.01},
+      {key:'flexible',name:'Glacier Flex', label:'S3 Glacier Flexible',    priceUSD:0.0036,  retrieval:0.03*FX, retrievalLabel:'€0.026/GB',  minDays:90,   access:'1min–12hrs',  note:'Mins to hrs retrieval',             put:0.03,   get:0.01},
+      {key:'archive', name:'Deep Archive', label:'S3 Glacier Deep Archive',priceUSD:0.00099, retrieval:0.02*FX, retrievalLabel:'€0.017/GB',  minDays:180,  access:'12 hours',    note:'Cheapest; 180-day minimum',         put:0.05,   get:0.09},
     ],
-    warnings:[
-      'Egress to internet costs ~€0.078/GB for first 10TB/mo — keep DuckDB compute in same region to avoid this.',
-      'S3 Intelligent-Tiering charges ~€0.0018/object/month monitoring fee for objects >128KB — adds up fast at 1,000+ runs.',
-      'Glacier Flexible Retrieval: expedited retrieval costs €0.026/GB; standard (3–5hrs) is cheaper.',
-      'Early deletion penalties: Standard-IA 30 days, Glacier Flexible 90 days, Deep Archive 180 days.',
-      'One Zone-IA stores data in a single AZ — if that AZ fails, data is lost. Only use for recreatable data.',
-      'Request charges: PUT/LIST $0.005/1,000; GET $0.0004/1,000. Log-heavy workloads can spend 2× on requests vs storage.',
-    ]
+    egress:{free:100, rate:0.09*FX},
+    warnings:['Egress to internet costs ~€0.078/GB for first 10TB/mo — keep DuckDB compute in same region to avoid this.','S3 Intelligent-Tiering charges ~€0.0018/object/month monitoring fee for objects >128KB — adds up fast at 1,000+ runs.','Glacier Flexible Retrieval: expedited retrieval costs €0.026/GB; standard (3–5hrs) is cheaper.','Early deletion penalties: Standard-IA 30 days, Glacier Flexible 90 days, Deep Archive 180 days.','One Zone-IA stores data in a single AZ — if that AZ fails, data is lost. Only use for recreatable data.','Request charges: PUT/LIST $0.005/1,000; GET $0.0004/1,000. Log-heavy workloads can spend 2× on requests vs storage.']
   },
   azure:{
     name:'Azure Blob',
-    infoBox:{
-      title:'Azure Smart Tier',
-      pill:'Preview 2026',
-      text:'Azure Smart Tier automatically moves blobs between Hot, Cool, and Cold based on access patterns — with NO per-object monitoring fee (unlike AWS Intelligent-Tiering). Currently in preview as of 2026; verify GA status before production use. Effective cost sits between Hot and Cool depending on access frequency.'
-    },
-    splits:[0.20,0.20,0.20,0.15,0.15,0.10],
+    infoBox:{title:'Azure Smart Tier',pill:'Preview 2026',text:'Azure Smart Tier automatically moves blobs between Hot, Cool, and Cold based on access patterns — with NO per-object monitoring fee (unlike AWS Intelligent-Tiering). Currently in preview as of 2026; verify GA status before production use. Effective cost sits between Hot and Cool depending on access frequency.'},
+    splits:[0.20,0.20,0.20,0.15,0.15],
     tiers:[
-      {key:'hot',     name:'Hot',     label:'Blob Hot',     priceUSD:0.018,   retrieval:'free',            minDays:null, access:'Instant', useCase:'Active runs + catalog',    note:'No minimum duration'},
-      {key:'warm',    name:'Cool',    label:'Blob Cool',    priceUSD:0.010,   retrieval:'€0.009/GB',       minDays:30,   access:'Instant', useCase:'Monthly access batches',   note:'30-day minimum billing'},
-      {key:'cold',    name:'Cold',    label:'Blob Cold',    priceUSD:0.005,  retrieval:'€0.026/GB',       minDays:90,   access:'Instant', useCase:'Quarterly archives',       note:'New in 2023; 90-day minimum'},
-      {key:'smart',   name:'Smart',   label:'Smart Tier',   priceUSD:0.018,   retrieval:'free (auto)',     minDays:null, access:'Varies',  useCase:'Auto Hot/Cool/Cold',       note:'No monitoring fee unlike AWS IT'},
-      {key:'archive', name:'Archive', label:'Blob Archive', priceUSD:0.002, retrieval:'€0.019/GB rehyd.',minDays:180,  access:'1–15 hrs',useCase:'Compliance / legal only',  note:'Rehydration required; offline tier'},
+      {key:'hot',    name:'Hot',    label:'Blob Hot',    priceUSD:0.018,  retrieval:0,       retrievalLabel:'free',              minDays:null, access:'Instant',  note:'No minimum duration',              put:0.0228, get:0.00036},
+      {key:'warm',   name:'Cool',   label:'Blob Cool',   priceUSD:0.010,  retrieval:0.01,    retrievalLabel:'€0.009/GB',         minDays:30,   access:'Instant',  note:'30-day minimum billing',           put:0.010,  get:0.001},
+      {key:'cold',   name:'Cold',   label:'Blob Cold',   priceUSD:0.0043, retrieval:0.026,   retrievalLabel:'€0.026/GB',         minDays:90,   access:'Instant',  note:'New in 2023; 90-day minimum',      put:0.010,  get:0.010},
+      {key:'smart',  name:'Smart',  label:'Smart Tier',  priceUSD:0.018,  retrieval:0,       retrievalLabel:'free (auto)',        minDays:null, access:'Varies',   note:'No monitoring fee unlike AWS IT',  put:0.010,  get:0.001},
+      {key:'archive',name:'Archive',label:'Blob Archive',priceUSD:0.002,  retrieval:0.022,   retrievalLabel:'€0.019/GB rehyd.',  minDays:180,  access:'1–15 hrs', note:'Rehydration required; offline tier',put:0.010, get:0.65},
     ],
-    warnings:[
-      'GRS (Geo-Redundant Storage) roughly doubles the per-GB rate — Hot becomes ~€0.031/GB. Check your default redundancy setting.',
-      'Azure Cold and Archive tiers apply a 128 KiB minimum billable object size. 1M small files in Cold = billed as 128GB.',
-      'Archive tier is offline — blobs cannot be read directly. Rehydration to Hot or Cool takes 1–15 hours.',
-      'Azure Smart Tier is in preview (2026) — verify GA status before relying on it for production workloads.',
-      'Early deletion penalties: Cool 30 days, Cold 90 days, Archive 180 days — billed for remaining days if deleted early.',
-    ]
+    egress:{free:100, rate:0.087},
+    warnings:['GRS (Geo-Redundant Storage) roughly doubles the per-GB rate — Hot becomes ~€0.031/GB. Check your default redundancy setting.','Azure Cold and Archive tiers apply a 128 KiB minimum billable object size. 1M small files in Cold = billed as 128GB.','Archive tier is offline — blobs cannot be read directly. Rehydration to Hot or Cool takes 1–15 hours.','Azure Smart Tier is in preview (2026) — verify GA status before relying on it for production workloads.','Early deletion penalties: Cool 30 days, Cold 90 days, Archive 180 days — billed for remaining days if deleted early.']
   },
   gcp:{
     name:'Google Cloud',
-    infoBox:{
-      title:'GCP 2026 pricing changes',
-      pill:'Updated 2026',
-      text:'Google made two notable changes in 2026: Nearline multi-region pricing increased from $0.010 to $0.015/GB, and Archive multi-region pricing decreased from $0.004 to $0.0024/GB (US/EU). Review your lifecycle policies if you use multi-region buckets — the old math no longer holds.'
-    },
+    infoBox:{title:'GCP 2026 pricing changes',pill:'Updated 2026',text:'Google made two notable changes in 2026: Nearline multi-region pricing increased from $0.010 to $0.015/GB, and Archive multi-region pricing decreased from $0.004 to $0.0024/GB (US/EU). Review your lifecycle policies if you use multi-region buckets — the old math no longer holds.'},
     splits:[0.25,0.25,0.25,0.25],
     tiers:[
-      {key:'hot',     name:'Standard', label:'GCS Standard', priceUSD:0.020,  retrieval:'free',      minDays:null, access:'Instant',    useCase:'Active runs + catalog',   note:'Free inter-region reads in same multi-region'},
-      {key:'warm',    name:'Nearline', label:'GCS Nearline',  priceUSD:0.010,  retrieval:'€0.009/GB', minDays:30,   access:'Instant',    useCase:'Monthly access archives', note:'30-day minimum; multi-region now $0.015'},
-      {key:'cold',    name:'Coldline', label:'GCS Coldline',  priceUSD:0.004,  retrieval:'€0.017/GB', minDays:90,   access:'Instant',    useCase:'Quarterly archives',      note:'90-day minimum billing'},
-      {key:'archive', name:'Archive',  label:'GCS Archive',   priceUSD:0.0012, retrieval:'€0.043/GB', minDays:365,  access:'Instant',    useCase:'Compliance / legal only', note:'365-day minimum; multi-region $0.0024'},
+      {key:'hot',    name:'Standard',label:'GCS Standard',priceUSD:0.020, retrieval:0,      retrievalLabel:'free',      minDays:null, access:'Instant', note:'Free inter-region reads in same multi-region',put:0.005, get:0.0004},
+      {key:'warm',   name:'Nearline',label:'GCS Nearline',priceUSD:0.010, retrieval:0.01*FX,retrievalLabel:'€0.009/GB', minDays:30,   access:'Instant', note:'30-day minimum; multi-region now $0.015',     put:0.01,  get:0.001},
+      {key:'cold',   name:'Coldline',label:'GCS Coldline',priceUSD:0.004, retrieval:0.02*FX,retrievalLabel:'€0.017/GB', minDays:90,   access:'Instant', note:'90-day minimum billing',                      put:0.01,  get:0.005},
+      {key:'archive',name:'Archive', label:'GCS Archive', priceUSD:0.0012,retrieval:0.05*FX,retrievalLabel:'€0.043/GB', minDays:365,  access:'Instant', note:'365-day minimum; multi-region $0.0024',       put:0.05,  get:0.05},
     ],
-    warnings:[
-      'GCP Archive has a 365-day minimum storage duration — the longest of all providers. Delete early and pay for the full year.',
-      'GCP Archive retrieval is €0.043/GB — significantly more expensive than AWS Deep Archive (€0.017/GB). Model retrieval before choosing.',
-      'Multi-region Nearline increased to $0.015/GB in 2026 — recalculate if you used it previously.',
-      'Class A operations (writes, list) cost more than Class B (reads). List-heavy workloads can spike costs.',
-      'GCP charges for inter-region egress even within GCP; same-multi-region reads are free, but cross-region transfers are not.',
-    ]
+    egress:{free:200, rate:0.08*FX},
+    warnings:['GCP Archive has a 365-day minimum storage duration — the longest of all providers. Delete early and pay for the full year.','GCP Archive retrieval is €0.043/GB — significantly more expensive than AWS Deep Archive (€0.017/GB). Model retrieval before choosing.','Multi-region Nearline increased to $0.015/GB in 2026 — recalculate if you used it previously.','Class A operations (writes, list) cost more than Class B (reads). List-heavy workloads can spike costs.','GCP charges for inter-region egress even within GCP; same-multi-region reads are free, but cross-region transfers are not.']
   },
   oci:{
     name:'Oracle OCI',
-    infoBox:{
-      title:'OCI egress advantage',
-      pill:'Key differentiator',
-      text:'Oracle OCI includes 10 TB/month of free egress across all OCI services, then charges only $0.0085/GB — roughly 10× cheaper than AWS at $0.09/GB. OCI Standard storage is more expensive per-GB than AWS/Azure/GCP, but for egress-heavy workloads (data distribution, multi-cloud architectures) OCI is frequently cheaper overall. Choose OCI on total cost including transfer, not on storage rate alone.'
-    },
+    infoBox:{title:'OCI egress advantage',pill:'Key differentiator',text:'Oracle OCI includes 10 TB/month of free egress across all OCI services, then charges only $0.0085/GB — roughly 10× cheaper than AWS at $0.09/GB. OCI Standard storage is more expensive per-GB than AWS/Azure/GCP, but for egress-heavy workloads OCI is frequently cheaper overall. Choose OCI on total cost including transfer, not on storage rate alone.'},
     splits:[0.40,0.35,0.25],
     tiers:[
-      {key:'hot',     name:'Standard',   label:'OCI Object Standard',   priceUSD:0.0255, retrieval:'free',       minDays:null, access:'Instant',   useCase:'Active runs + catalog',  note:'Same price in all OCI regions globally'},
-      {key:'warm',    name:'Infreq.',     label:'OCI Infrequent Access', priceUSD:0.015,  retrieval:'€0.009/GB', minDays:31,   access:'Instant',   useCase:'Monthly access archives',note:'31-day minimum billing'},
-      {key:'archive', name:'Archive',     label:'OCI Archive',           priceUSD:0.0026, retrieval:'€0.009/GB', minDays:90,   access:'~1 hour',   useCase:'Compliance / legal only',note:'~1hr restore; 90-day minimum'},
+      {key:'hot',    name:'Standard', label:'OCI Object Standard',   priceUSD:0.0255,retrieval:0,      retrievalLabel:'free',      minDays:null,access:'Instant',  note:'Same price in all OCI regions globally',put:0.00368,get:0.000295},
+      {key:'warm',   name:'Infreq.',  label:'OCI Infrequent Access', priceUSD:0.015, retrieval:0.01*FX,retrievalLabel:'€0.009/GB', minDays:31,  access:'Instant',  note:'31-day minimum billing',               put:0.00368,get:0.00368},
+      {key:'archive',name:'Archive',  label:'OCI Archive',           priceUSD:0.0026,retrieval:0.01*FX,retrievalLabel:'€0.009/GB', minDays:90,  access:'~1 hour',  note:'~1hr restore; 90-day minimum',         put:0.00368,get:0.02},
     ],
-    warnings:[
-      'OCI Standard at €0.022/GB is the most expensive hot tier of the four providers — only choose OCI if egress savings justify it.',
-      'OCI includes 10 TB/month free egress then $0.0085/GB — roughly 10× cheaper than AWS at $0.09/GB.',
-      'OCI Archive restores in ~1 hour — faster than AWS Deep Archive (12 hrs) and Azure Archive (1–15 hrs).',
-      'OCI prices are consistent globally — no regional price variance unlike AWS, Azure, and GCP.',
-      '31-day minimum on Infrequent Access — slightly longer than Azure Cool and AWS Standard-IA (both 30 days).',
-    ]
+    egress:{free:10240, rate:0.0085*FX},
+    warnings:['OCI Standard at €0.022/GB is the most expensive hot tier of the four providers — only choose OCI if egress savings justify it.','OCI includes 10 TB/month free egress then $0.0085/GB — roughly 10× cheaper than AWS at $0.09/GB.','OCI Archive restores in ~1 hour — faster than AWS Deep Archive (12 hrs) and Azure Archive (1–15 hrs).','OCI prices are consistent globally — no regional price variance unlike AWS, Azure, and GCP.','31-day minimum on Infrequent Access — slightly longer than Azure Cool and AWS Standard-IA (both 30 days).']
   }
 };
 
-const EUR=v=>v*FX;
-const fmtE=v=>v>=1000?'€'+Math.round(v).toLocaleString():v>=1?'€'+v.toFixed(2):v>=0.1?'€'+v.toFixed(3):v>=0.01?'€'+v.toFixed(4):'€'+v.toFixed(4);
+const fmtE=v=>{
+  if(v===0)return'FREE';
+  if(v>=1000)return'€'+Math.round(v).toLocaleString();
+  if(v>=1)return'€'+v.toFixed(2);
+  if(v>=0.1)return'€'+v.toFixed(3);
+  return'€'+v.toFixed(4);
+};
 const fmtGB=v=>v>=1024?(v/1024).toFixed(1)+' TB':Math.round(v)+' GB';
 
 function getVals(){
   const parquetMB=+document.getElementById('parquet-slider').value;
   const gdxGB=+document.getElementById('gdx-slider').value;
   const runs=+document.getElementById('runs-slider').value;
-  return{parquetMB,gdxGB,runs,
+  const queries=+document.getElementById('queries-slider').value;
+  const readMB=+document.getElementById('readmb-slider').value;
+  return{parquetMB,gdxGB,runs,queries,readMB,
     totalParquetGB:(parquetMB*runs)/1024,
     totalGdxGB:gdxGB*runs};
 }
 
 function setProvider(p){
   provider=p;
-  ['aws','azure','gcp','oci'].forEach(id=>{
-    document.getElementById('btn-'+id).classList.toggle('active',id===p);
-  });
+  ['aws','azure','gcp','oci'].forEach(id=>document.getElementById('btn-'+id).classList.toggle('active',id===p));
+  render();
+}
+
+function setEgress(m){
+  egressMode=m;
+  document.getElementById('e-same').classList.toggle('active',m==='same');
+  document.getElementById('e-ext').classList.toggle('active',m==='ext');
   render();
 }
 
 function render(){
-  const{parquetMB,gdxGB,runs,totalParquetGB,totalGdxGB}=getVals();
+  const{parquetMB,gdxGB,runs,queries,readMB,totalParquetGB,totalGdxGB}=getVals();
   const prov=PROVIDERS[provider];
   const tiers=prov.tiers;
   const splits=prov.splits;
-  const hotEur=EUR(tiers[0].priceUSD);
+  const hotEurPerGB=tiers[0].priceUSD*FX;
 
   let totalCost=0;
   const tierCosts=tiers.map((t,i)=>{
-    const gb=totalParquetGB*splits[i];
-    const cost=EUR(gb*t.priceUSD);
+    const gb=totalParquetGB*(splits[i]||0.1);
+    const cost=(gb*t.priceUSD*FX);
     totalCost+=cost;
     return{gb,cost};
   });
 
-  const naiveCost=totalGdxGB*hotEur;
+  const naiveCost=totalGdxGB*hotEurPerGB;
   const saving=naiveCost-totalCost;
   const savingPct=Math.round((saving/naiveCost)*100);
 
@@ -320,11 +339,11 @@ function render(){
       </div>
       <div class="tier-body">
         <div class="tier-cost">${fmtE(tierCosts[i].cost)}<span style="font-size:.85rem;font-weight:400">/mo</span></div>
-        <div class="tier-size">${tierCosts[i].gb.toFixed(1)} GB · ${Math.round(splits[i]*100)}% of runs</div>
+        <div class="tier-size">${tierCosts[i].gb.toFixed(1)} GB · ${Math.round((splits[i]||0.1)*100)}% of runs</div>
         <div class="tier-details">
-          <div class="tier-detail-row"><span class="dk">€/GB/mo</span><span class="dv">${fmtE(EUR(t.priceUSD))}</span></div>
+          <div class="tier-detail-row"><span class="dk">€/GB/mo</span><span class="dv">${fmtE(t.priceUSD*FX)}</span></div>
           <div class="tier-detail-row"><span class="dk">Access</span><span class="dv">${t.access}</span></div>
-          <div class="tier-detail-row"><span class="dk">Retrieval</span><span class="dv">${t.retrieval}</span></div>
+          <div class="tier-detail-row"><span class="dk">Retrieval</span><span class="dv">${t.retrievalLabel}</span></div>
           <div class="tier-detail-row"><span class="dk">Min storage</span><span class="dv">${t.minDays?t.minDays+' days':'none'}</span></div>
           <div class="tier-detail-row"><span class="dk">Note</span><span class="dv" style="text-align:right;max-width:95px">${t.note}</span></div>
         </div>
@@ -332,12 +351,43 @@ function render(){
     </div>
   `).join('');
 
-  // Chart — exclude 'smart' tier (auto tier, same price as hot)
+  // Operations & Egress breakdown (using hot tier pricing as baseline)
+  const hotTier=tiers[0];
+  const runsPerMo=runs/12;
+  const putsPerMo=Math.round(runsPerMo*7);
+  const getsPerMo=queries*7;
+  const dataReadGB=(queries*readMB)/1024;
+  const putCost=(putsPerMo/10000)*hotTier.put*FX;
+  const getCost=(getsPerMo/10000)*hotTier.get*FX;
+  const retCost=hotTier.retrieval*dataReadGB;
+  let egressCost=0, egressNote='';
+  if(egressMode==='same'){
+    egressNote='FREE — data stays within cloud region';
+  }else{
+    const over=Math.max(0,dataReadGB-prov.egress.free);
+    egressCost=over*prov.egress.rate;
+    egressNote=dataReadGB<=prov.egress.free
+      ?`${fmtGB(dataReadGB)} — within ${fmtGB(prov.egress.free)} free tier`
+      :`${fmtGB(dataReadGB)} — ${fmtGB(over)} over free tier @ ${fmtE(prov.egress.rate)}/GB`;
+  }
+  const listCost=(50/10000)*hotTier.put*FX;
+  const opsTotal=putCost+getCost+retCost+egressCost+listCost;
+
+  document.getElementById('ops-breakdown').innerHTML=`
+    <div class="ops-row"><span>PUT operations (${putsPerMo.toLocaleString()}/mo — ${Math.round(runsPerMo)} runs × 7 symbols)</span><span class="${putCost<0.05?'ok':'warn'}">${fmtE(putCost)}</span></div>
+    <div class="ops-row"><span>GET operations (${getsPerMo.toLocaleString()}/mo — ${queries} queries × 7 files)</span><span class="${getCost<0.05?'ok':'warn'}">${fmtE(getCost)}</span></div>
+    <div class="ops-row"><span>Data retrieval fee (${fmtGB(dataReadGB)}/mo read from hot tier)</span><span class="${retCost===0?'ok':retCost<1?'warn':'bad'}">${retCost===0?'FREE':fmtE(retCost)}</span></div>
+    <div class="ops-row"><span>Egress — ${egressNote}</span><span class="${egressCost===0?'ok':egressCost<1?'warn':'bad'}">${egressCost===0?'FREE':fmtE(egressCost)}</span></div>
+    <div class="ops-row"><span>LIST operations (~50/mo)</span><span class="ok">${fmtE(listCost)}</span></div>
+    <div class="ops-row"><span>DELETE operations (lifecycle cleanup)</span><span class="ok">FREE</span></div>
+    <div class="ops-total"><span>Total ops + egress / month</span><span style="color:${opsTotal<1?'var(--green)':opsTotal<10?'var(--amber)':'var(--red)'}">${fmtE(opsTotal)}</span></div>
+  `;
+
+  // Chart
   const chartTiers=tiers.filter(t=>t.key!=='smart');
   const chartSplits=splits.slice(0,chartTiers.length);
   const barColors=['#3b82f6','#10b981','#f97316','#8b5cf6','#f59e0b','#6b7280'];
   const lightColors=['#1e3a5f','#065f46','#7c2d12','#3b1f6e','#78350f','#374151'];
-
   const ctx=document.getElementById('chart').getContext('2d');
   if(chartInst)chartInst.destroy();
   chartInst=new Chart(ctx,{
@@ -345,8 +395,8 @@ function render(){
     data:{
       labels:chartTiers.map(t=>t.name),
       datasets:[
-        {label:'Parquet (selective)',data:chartTiers.map((t,i)=>+EUR(totalParquetGB*chartSplits[i]*t.priceUSD).toFixed(4)),backgroundColor:barColors,borderRadius:4},
-        {label:'Full GDX per tier',data:chartTiers.map((t,i)=>+(totalGdxGB*chartSplits[i]*EUR(t.priceUSD)).toFixed(2)),backgroundColor:lightColors,borderRadius:4}
+        {label:'Parquet (selective)',data:chartTiers.map((t,i)=>+((totalParquetGB*(chartSplits[i]||0.15))*t.priceUSD*FX).toFixed(4)),backgroundColor:barColors,borderRadius:4},
+        {label:'Full GDX per tier', data:chartTiers.map((t,i)=>+((totalGdxGB*(chartSplits[i]||0.15))*t.priceUSD*FX).toFixed(2)),backgroundColor:lightColors,borderRadius:4}
       ]
     },
     options:{
@@ -354,14 +404,14 @@ function render(){
       plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${fmtE(c.parsed.y)}/mo`}}},
       scales:{
         x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#7a8aaa',font:{family:'DM Mono',size:11}}},
-        y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#7a8aaa',font:{family:'DM Mono',size:10},callback:v=>v>=1?'€'+Math.round(v).toLocaleString():'€'+v.toFixed(3)}}
+        y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#7a8aaa',font:{family:'DM Mono',size:10},callback:v=>v>=1?'€'+v.toFixed(2):'€'+v.toFixed(3)}}
       }
     }
   });
 
   document.getElementById('chart-legend').innerHTML=`
     <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div>Parquet selective save</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#1e3a5f"></div>Full GDX per tier (for comparison)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#1e3a5f"></div>Full GDX per tier (comparison)</div>
   `;
 
   document.getElementById('warnings').innerHTML=`
@@ -380,6 +430,14 @@ document.getElementById('gdx-slider').addEventListener('input',function(){
 });
 document.getElementById('runs-slider').addEventListener('input',function(){
   document.getElementById('runs-val').textContent=(+this.value).toLocaleString();
+  render();
+});
+document.getElementById('queries-slider').addEventListener('input',function(){
+  document.getElementById('queries-val').textContent=(+this.value).toLocaleString();
+  render();
+});
+document.getElementById('readmb-slider').addEventListener('input',function(){
+  document.getElementById('readmb-val').textContent=this.value+' MB';
   render();
 });
 
